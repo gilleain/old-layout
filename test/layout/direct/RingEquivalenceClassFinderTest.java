@@ -212,6 +212,21 @@ public class RingEquivalenceClassFinderTest {
         return mol;
     }
     
+    public IAtomContainer makeBowtieane() {
+        IAtomContainer mol = builder.newInstance(IAtomContainer.class);
+        addAtoms(10, "C", mol);
+        addSingleBonds(0, mol, 1, 7);
+        addSingleBonds(1, mol, 2, 8);
+        addSingleBonds(2, mol, 3, 6);
+        addSingleBonds(3, mol, 4, 9);
+        addSingleBonds(4, mol, 5);
+        addSingleBonds(5, mol, 6, 9);
+        addSingleBonds(6, mol, 7);
+        addSingleBonds(7, mol, 8);
+        addSingleBonds(8, mol, 9);
+        return mol;
+    }
+    
     @Test
     public void cyclicSequenceForwardSucceedTest() {
         int[] seqA = new int[] {1, 2, 1, 0, 0, 1};
@@ -248,12 +263,18 @@ public class RingEquivalenceClassFinderTest {
     }
     
     public void sssrFinderEqClTest(IAtomContainer atomContainer) {
-        List<IAtomContainer> eqCl = 
+        List<IRingSet> eqCl = 
             new SSSRFinder(atomContainer).findEquivalenceClasses();
         for (int cl = 0; cl < eqCl.size(); cl++) {
             System.out.println(cl);
             print(atomContainer, (IRingSet)eqCl.get(cl));
         }
+    }
+    
+    @Test
+    public void bowtieaneRingEqClTest() {
+//        ringEqClTest(makeBowtieane());
+        sssrFinderEqClTest(makeBowtieane());
     }
     
     @Test
