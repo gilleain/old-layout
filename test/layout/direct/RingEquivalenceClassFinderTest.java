@@ -156,9 +156,7 @@ public class RingEquivalenceClassFinderTest {
     // the example used by Ulrich Bauer in the SimpleCycleBasis test
     public IAtomContainer makeBauersGraph() {
         IAtomContainer mol = builder.newInstance(IAtomContainer.class);
-        for (int i = 0; i < 8; i++) {
-            mol.addAtom(builder.newInstance(IAtom.class, "C"));
-        }
+        addAtoms(8, "C", mol);
         addSingleBonds(0, mol, 1, 2);
         addSingleBonds(1, mol, 2, 3, 4, 6);
         addSingleBonds(2, mol, 3, 4, 5, 7);
@@ -170,9 +168,7 @@ public class RingEquivalenceClassFinderTest {
     
     public IAtomContainer makeTwistane() {
         IAtomContainer mol = builder.newInstance(IAtomContainer.class);
-        for (int i = 0; i < 10; i++) {
-            mol.addAtom(builder.newInstance(IAtom.class, "C"));
-        }
+        addAtoms(10, "C", mol);
         addSingleBonds(0, mol, 1, 5);
         addSingleBonds(1, mol, 2, 7);
         addSingleBonds(2, mol, 3);
@@ -184,6 +180,37 @@ public class RingEquivalenceClassFinderTest {
         return mol;
     }
     
+    public IAtomContainer makeFullerene26() {
+        IAtomContainer mol = builder.newInstance(IAtomContainer.class);
+        addAtoms(26, "C", mol);
+        addSingleBonds(0, mol, 1, 4, 5);
+        addSingleBonds(1, mol, 2, 6);
+        addSingleBonds(2, mol, 3, 7);
+        addSingleBonds(3, mol, 4, 8);
+        addSingleBonds(4, mol, 9);
+        addSingleBonds(5, mol, 10, 15);
+        addSingleBonds(6, mol, 10, 11);
+        addSingleBonds(7, mol, 11, 12);
+        addSingleBonds(8, mol, 13, 14);
+        addSingleBonds(9, mol, 14, 15);
+        addSingleBonds(10, mol, 16);
+        addSingleBonds(11, mol, 17);
+        addSingleBonds(12, mol, 13, 18);
+        addSingleBonds(13, mol, 19);
+        addSingleBonds(14, mol, 20);
+        addSingleBonds(15, mol, 21);
+        addSingleBonds(16, mol, 21, 22);
+        addSingleBonds(17, mol, 18, 22);
+        addSingleBonds(18, mol, 25);
+        addSingleBonds(19, mol, 20, 25);
+        addSingleBonds(20, mol, 23);
+        addSingleBonds(21, mol, 23);
+        addSingleBonds(22, mol, 24);
+        addSingleBonds(23, mol, 24);
+        addSingleBonds(24, mol, 25);
+        isKConnected(mol, 3);
+        return mol;
+    }
     
     @Test
     public void cyclicSequenceForwardSucceedTest() {
@@ -227,6 +254,12 @@ public class RingEquivalenceClassFinderTest {
             System.out.println(cl);
             print(atomContainer, (IRingSet)eqCl.get(cl));
         }
+    }
+    
+    @Test
+    public void fullerene26RingEqClTest() {
+//        ringEqClTest(makeFullerene26());
+        sssrFinderEqClTest(makeFullerene26());
     }
     
     @Test
