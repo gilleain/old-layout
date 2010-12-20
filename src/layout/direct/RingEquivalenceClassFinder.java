@@ -10,6 +10,7 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.signature.MoleculeSignature;
+import org.openscience.cdk.signature.SignatureQuotientGraph;
 
 import signature.SymmetryClass;
 
@@ -19,12 +20,16 @@ public class RingEquivalenceClassFinder {
             IAtomContainer atomContainer, IRingSet ringSet) {
         // partition the vertices into symmetry classes
         MoleculeSignature molSignature = new MoleculeSignature(atomContainer);
+        SignatureQuotientGraph sqg = new SignatureQuotientGraph(atomContainer);
+        System.out.println(sqg);
         List<SymmetryClass> symmetryClasses = molSignature.getSymmetryClasses();
+        for (SymmetryClass sym : symmetryClasses) { System.out.println(sym); }
         int[] symmetryClassLookup = makeSymmetryClassLookup(atomContainer, symmetryClasses);
-        
+        System.out.println("Sym : " + Arrays.toString(symmetryClassLookup));
         // use these to partition the rings into classes
         Map<int[], List<IAtomContainer>> 
             ringSequenceMap = new HashMap<int[], List<IAtomContainer>>();
+        int ringCount = 0;
         for (IAtomContainer ring : ringSet.atomContainers()) {
             int n = ring.getAtomCount();
             int[] classSequence = new int[n];
@@ -33,7 +38,7 @@ public class RingEquivalenceClassFinder {
                 int atomNumber = atomContainer.getAtomNumber(atom);
                 classSequence[i] = symmetryClassLookup[atomNumber];
             }
-            System.out.println(Arrays.toString(classSequence));
+            System.out.println(ringCount++ + Arrays.toString(classSequence));
             // add the ring to the map
             List<IAtomContainer> ringEquivalenceClass = null;
             for (int[] sequenceRep : ringSequenceMap.keySet()) {

@@ -1,5 +1,6 @@
 package layout.direct;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,21 +8,134 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.Molecule;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
+import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.interfaces.IRingSet;
+import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.io.IChemObjectReader.Mode;
 import org.openscience.cdk.ringsearch.SSSRFinder;
+import org.openscience.cdk.templates.MoleculeFactory;
 
 public class RingEquivalenceClassFinderTest {
     
     private IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
     
+    public void addAtoms(int count, String elementSymbol, IAtomContainer atomContainer) {
+        for (int i = 0; i < count; i++) {
+            atomContainer.addAtom(builder.newInstance(IAtom.class, elementSymbol));
+        }
+    }
+    
     public void addSingleBonds(int from, IAtomContainer mol, int... toArr) {
         for (int to : toArr) {
             mol.addBond(to, from, IBond.Order.SINGLE);
         }
+    }
+    
+    public void isKConnected(IAtomContainer ac, int k) {
+        for (int i = 0; i < ac.getAtomCount(); i++) {
+            IAtom atom = ac.getAtom(i);
+            if (ac.getConnectedAtomsCount(atom) < k) {
+                System.out.println("atom " + i + " not " + k + "-connected");
+            }
+        }
+    }
+    
+    public void isKBondOrder(IAtomContainer ac, int k) {
+        for (int i = 0; i < ac.getAtomCount(); i++) {
+            IAtom atom = ac.getAtom(i);
+            if (ac.getBondOrderSum(atom) < k) {
+                System.out.println("atom " + i + " not " + k + "-bondorder");
+            }
+        }
+    }
+    
+    public IAtomContainer makeDodecahedrane() {
+        IAtomContainer mol = builder.newInstance(IAtomContainer.class);
+        addAtoms(20, "C", mol);
+        mol.addBond(0, 1, IBond.Order.SINGLE);
+        mol.addBond(0, 4, IBond.Order.SINGLE);
+        mol.addBond(0, 5, IBond.Order.DOUBLE);
+        mol.addBond(1, 2, IBond.Order.DOUBLE);
+        mol.addBond(1, 6, IBond.Order.SINGLE);
+        mol.addBond(2, 3, IBond.Order.SINGLE);
+        mol.addBond(2, 7, IBond.Order.SINGLE);
+        mol.addBond(3, 4, IBond.Order.SINGLE);
+        mol.addBond(3, 8, IBond.Order.DOUBLE);
+        mol.addBond(4, 9, IBond.Order.DOUBLE);
+        mol.addBond(5, 10, IBond.Order.SINGLE);
+        mol.addBond(5, 14, IBond.Order.SINGLE);
+        mol.addBond(6, 10, IBond.Order.SINGLE);
+        mol.addBond(6, 11, IBond.Order.DOUBLE);
+        mol.addBond(7, 11, IBond.Order.SINGLE);
+        mol.addBond(7, 12, IBond.Order.DOUBLE);
+        mol.addBond(8, 12, IBond.Order.SINGLE);
+        mol.addBond(8, 13, IBond.Order.SINGLE);
+        mol.addBond(9, 13, IBond.Order.SINGLE);
+        mol.addBond(9, 14, IBond.Order.SINGLE);
+        mol.addBond(10, 16, IBond.Order.DOUBLE);
+        mol.addBond(11, 17, IBond.Order.SINGLE);
+        mol.addBond(12, 18, IBond.Order.SINGLE);
+        mol.addBond(13, 19, IBond.Order.DOUBLE);
+        mol.addBond(14, 15, IBond.Order.DOUBLE);
+        mol.addBond(15, 16, IBond.Order.SINGLE);
+        mol.addBond(15, 19, IBond.Order.SINGLE);
+        mol.addBond(16, 17, IBond.Order.SINGLE);
+        mol.addBond(17, 18, IBond.Order.DOUBLE);
+        mol.addBond(18, 19, IBond.Order.SINGLE);
+//        addSingleBonds(0, mol, 1, 4);
+//        addSingleBonds(1, mol, 6);
+//        addSingleBonds(2, mol, 3, 7);
+//        addSingleBonds(3, mol, 4);
+//        addSingleBonds(5, mol, 10, 11);
+//        addSingleBonds(6, mol, 11);
+//        addSingleBonds(7, mol, 12);
+//        addSingleBonds(8, mol, 14);
+//        addSingleBonds(9, mol, 10, 14);
+//        addSingleBonds(12, mol, 17);
+//        addSingleBonds(13, mol, 18);
+//        addSingleBonds(15, mol, 16, 19);
+//        addSingleBonds(16, mol, 17);
+//        addSingleBonds(18, mol, 19);
+//        
+//        mol.addBond(0, 5, IBond.Order.DOUBLE);
+//        mol.addBond(1, 2, IBond.Order.DOUBLE);
+//        mol.addBond(3, 8, IBond.Order.DOUBLE);
+//        mol.addBond(4, 9, IBond.Order.DOUBLE);
+//        mol.addBond(6, 12, IBond.Order.DOUBLE);
+//        mol.addBond(7, 13, IBond.Order.DOUBLE);
+//        mol.addBond(8, 13, IBond.Order.DOUBLE);
+//        mol.addBond(10, 15, IBond.Order.DOUBLE);
+//        mol.addBond(11, 16, IBond.Order.DOUBLE);
+//        mol.addBond(14, 19, IBond.Order.DOUBLE);
+//        mol.addBond(17, 18, IBond.Order.DOUBLE);
+        isKConnected(mol, 3);
+        isKBondOrder(mol, 4);
+        return mol;
+    }
+    
+    public IAtomContainer getBuckyball() {
+        String filename = "data/mdl/buckyball.mol";
+        InputStream ins =
+            this.getClass().getClassLoader().getResourceAsStream(filename);
+        MDLV2000Reader reader = new MDLV2000Reader(ins, Mode.STRICT);
+        IMolecule molecule;
+        try {
+            molecule = (IMolecule)reader.read(new Molecule());
+            for (IBond bond : molecule.bonds()) {
+                bond.setOrder(IBond.Order.SINGLE);
+            }
+        } catch (CDKException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+        return molecule;
     }
     
     public IAtomContainer makeCuneane() {
@@ -99,37 +213,54 @@ public class RingEquivalenceClassFinderTest {
         Assert.assertFalse(RingEquivalenceClassFinder.cycliclyEqual(seqA, seqB));
     }
     
+    public void ringEqClTest(IAtomContainer atomContainer) {
+        IRingSet ringSet = new SSSRFinder(atomContainer).findSSSR();
+        List<List<IAtomContainer>> ringEqClasses = 
+            RingEquivalenceClassFinder.getRingEquivalenceClasses(atomContainer, ringSet);
+        print(atomContainer, ringEqClasses);
+    }
+    
+    public void sssrFinderEqClTest(IAtomContainer atomContainer) {
+        List<IAtomContainer> eqCl = 
+            new SSSRFinder(atomContainer).findEquivalenceClasses();
+        for (int cl = 0; cl < eqCl.size(); cl++) {
+            System.out.println(cl);
+            print(atomContainer, (IRingSet)eqCl.get(cl));
+        }
+    }
+    
+    @Test
+    public void alphaPineneRingEqClTest() {
+        ringEqClTest(MoleculeFactory.makeAlphaPinene());
+//        sssrFinderEqClTest(MoleculeFactory.makeAlphaPinene());
+    }
+    
+    @Test
+    public void dodecahedraneRingEqClTest() {
+//        ringEqClTest(makeDodecahedrane());
+        sssrFinderEqClTest(makeDodecahedrane());
+    }
+    
+    @Test
+    public void buckballRingEqClTest() {
+        ringEqClTest(getBuckyball());
+    }
+    
     @Test
     public void twistaneRingEquivalenceClassTest() {
-        IAtomContainer twistane = makeTwistane();
-        IRingSet ringSet = new SSSRFinder(twistane).findSSSR();
-        List<List<IAtomContainer>> ringEqClasses = 
-            RingEquivalenceClassFinder.getRingEquivalenceClasses(twistane, ringSet);
-        print(twistane, ringEqClasses);
+        ringEqClTest(makeTwistane());
+//        sssrFinderEqClTest(makeTwistane());
     }
     
     @Test
     public void cuneaneRingEquivalenceClassTest() {
-        IAtomContainer cuneane = makeCuneane();
-        IRingSet ringSet = new SSSRFinder(cuneane).findSSSR();
-        List<List<IAtomContainer>> ringEqClasses = 
-            RingEquivalenceClassFinder.getRingEquivalenceClasses(cuneane, ringSet);
-        print(cuneane, ringEqClasses);
+        ringEqClTest(makeCuneane());
     }
     
     @Test
     public void bauersGraphRingEquivalenceClassTest() {
-        IAtomContainer bauersGraph = makeBauersGraph();
-        IRingSet ringSet = new SSSRFinder(bauersGraph).findSSSR();
-        List<List<IAtomContainer>> ringEqClasses = 
-            RingEquivalenceClassFinder.getRingEquivalenceClasses(bauersGraph, ringSet);
-//        print(bauersGraph, ringEqClasses);
-        print(bauersGraph, ringSet);
-        List<IAtomContainer> eqCl = new SSSRFinder(bauersGraph).findEquivalenceClasses();
-        for (int cl = 0; cl < eqCl.size(); cl++) {
-            System.out.println(cl);
-//            print(bauersGraph, (IRingSet)eqCl.get(cl));
-        }
+        ringEqClTest(makeBauersGraph());
+//        sssrFinderEqClTest(makeBauersGraph());
     }
     
     public void print(IAtomContainer mol, IRingSet rings) {
