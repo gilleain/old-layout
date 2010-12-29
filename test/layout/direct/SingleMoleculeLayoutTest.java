@@ -2,12 +2,13 @@ package layout.direct;
 
 import java.io.IOException;
 
-import layout.BaseTest;
 import layout.direct.CDKSingleMoleculeLayout;
 
 import org.junit.Test;
 import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.templates.MoleculeFactory;
+
+import base.BaseTest;
 
 public class SingleMoleculeLayoutTest extends BaseTest {
     

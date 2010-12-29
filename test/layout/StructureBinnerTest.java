@@ -15,7 +15,8 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecule;
-import org.openscience.cdk.templates.MoleculeFactory;
+
+import base.BaseTest;
 
 public class StructureBinnerTest extends BaseTest {
     
