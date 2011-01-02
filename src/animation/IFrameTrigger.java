@@ -15,5 +15,7 @@ package animation;
 public interface IFrameTrigger {
     
     public void postLowLevelEvent(MicroEvent event);
+    
+    public void addFrameListener(FrameListener listener);
 
 }
